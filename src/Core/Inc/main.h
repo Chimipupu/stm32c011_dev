@@ -29,8 +29,6 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32c0xx_hal.h"
 
-#include "stm32c0xx_ll_adc.h"
-#include "stm32c0xx_ll_crc.h"
 #include "stm32c0xx_ll_i2c.h"
 #include "stm32c0xx_ll_rcc.h"
 #include "stm32c0xx_ll_bus.h"
@@ -40,7 +38,6 @@ extern "C" {
 #include "stm32c0xx_ll_utils.h"
 #include "stm32c0xx_ll_pwr.h"
 #include "stm32c0xx_ll_dma.h"
-#include "stm32c0xx_ll_spi.h"
 #include "stm32c0xx_ll_tim.h"
 #include "stm32c0xx_ll_usart.h"
 #include "stm32c0xx_ll_gpio.h"
@@ -73,8 +70,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define SPI_CSn_Pin LL_GPIO_PIN_4
-#define SPI_CSn_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 

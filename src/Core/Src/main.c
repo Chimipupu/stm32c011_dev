@@ -18,11 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "adc.h"
-#include "crc.h"
 #include "dma.h"
 #include "i2c.h"
-#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -88,35 +85,18 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-#if 0
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_ADC1_Init();
-  MX_CRC_Init();
   MX_I2C1_Init();
-  MX_SPI1_Init();
   MX_TIM14_Init();
   MX_TIM16_Init();
   MX_TIM17_Init();
   MX_USART1_UART_Init();
-  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-#else
-  MX_GPIO_Init();
-  MX_DMA_Init();
-  // MX_ADC1_Init();
-  // MX_CRC_Init();
-  MX_I2C1_Init();
-  // MX_SPI1_Init();
-  // MX_TIM14_Init();
-  // MX_TIM16_Init();
-  MX_TIM17_Init();
-  MX_USART1_UART_Init();
-  // MX_USART2_UART_Init();
-#endif
   app_main_init();
   /* USER CODE END 2 */
 
@@ -125,6 +105,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
     // (DEBUG)
     app_main();
