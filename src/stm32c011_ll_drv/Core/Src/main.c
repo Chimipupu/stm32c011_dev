@@ -28,7 +28,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "app_main.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -106,7 +106,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  app_main_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -114,7 +114,9 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+    // (DEBUG)
+    app_main();
+    LL_mDelay(1000);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
