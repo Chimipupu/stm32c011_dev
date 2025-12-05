@@ -12,6 +12,9 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
+# Define optimization settings
+set(CMAKE_C_FLAGS_DEBUG "-O0 -g3" CACHE STRING "C Flags for debug build" FORCE)
+set(CMAKE_C_FLAGS_RELEASE "-Os -DNDEBUG" CACHE STRING "C Flags for release build" FORCE)
 
 # Define the build type
 if(NOT CMAKE_BUILD_TYPE)
