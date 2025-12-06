@@ -14,7 +14,10 @@
 
 #include <stdint.h>
 
-#define DEBUG_TEST
+// [コンパイル]
+// #define DEBUG_UART_USE
+#define DMA_TEST
+// #define DEBUG_TEST
 
 extern void app_main_init(void);
 extern void app_main(void);

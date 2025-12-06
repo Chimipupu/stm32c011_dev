@@ -16,7 +16,7 @@
 #include "dma.h"
 #include "main.h"
 
-#ifdef DEBUG_TEST
+#ifdef DMA_TEST
 
 #define TEST_NG     (-1)
 #define TEST_OK     (0)
@@ -79,11 +79,11 @@ static void test_main(void)
         }
     }
 }
-#endif // DEBUG_TEST
+#endif // DMA_TEST
 
 void app_main_init(void)
 {
-#ifdef DEBUG_TEST
+#ifdef DMA_TEST
     memset(s_dma_src_buf, 0, sizeof(s_dma_src_buf));
     memset(s_dma_dst_buf, 0, sizeof(s_dma_dst_buf));
 
@@ -91,12 +91,12 @@ void app_main_init(void)
                         HAL_DMA_XFER_CPLT_CB_ID,
                         dma_transfer_complete_cb
                         );
-#endif
+#endif // DMA_TEST
 }
 
 void app_main(void)
 {
-#ifdef DEBUG_TEST
+#ifdef DMA_TEST
     test_main();
-#endif // DEBUG_TEST
+#endif // DMA_TEST
 }
