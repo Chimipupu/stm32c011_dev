@@ -1,4 +1,4 @@
-# 80円 SR ARMマイコン評価F/W開発
+# 80円 ST ARMマイコン評価F/W開発
 
 秋月電子で80円(税込み)のST ARMマイコンの評価用F/W個人開発リポジトリ
 
@@ -8,7 +8,10 @@
 
 - マイコン
   - [STM32C011F4P6](https://www.stmcu.jp/stm32/stm32c0/stm32c0x1/97032/)🔗
-    - [購入元 秋月電子リンク](https://akizukidenshi.com/catalog/g/g118189/)🔗
+    - [秋月電子リンク](https://akizukidenshi.com/catalog/g/g118189/)🔗
+- デバッガ
+  - [STLINK-V3MINIE](https://www.st.com/ja/development-tools/stlink-v3minie.html)🔗
+    - [秋月電子リンク](https://akizukidenshi.com/catalog/g/g118187/)🔗
 
 ### S/W開発環境
 
