@@ -40,7 +40,7 @@
 | DMA | x3本 |
 | GPIO | x18本 |
 | I2C | x1本 @100KHz, 400KHz, 1MHz|
-| I2S | x1本 <br>※I2Sと排他で使用可 |
+| I2S | x1本 <br>※SPIと排他で使用可 |
 | SPI | x1本 @24Mbit/s<br>※I2Sと排他で使用可 |
 | UART | x2本 |
 | タイマー | ・16bit 高機能タイマー x1本 (@TIM1)<br>・16bit 汎用タイマー x4本 (@TIM3/14/16/17) |
