@@ -54,11 +54,11 @@
 /* USER CODE BEGIN 0 */
 
 /* USART1受信バッファ */
-#define USART1_RX_BUFFER_SIZE 256
-static volatile uint8_t usart1_rx_buffer[USART1_RX_BUFFER_SIZE];
-static volatile uint16_t usart1_rx_head = 0;
-static volatile uint16_t usart1_rx_tail = 0;
-static volatile bool usart1_cmd_flg = false;
+#define USART1_RX_BUFFER_SIZE    256
+static volatile uint8_t s_uart_rx_buf[USART1_RX_BUFFER_SIZE];
+static volatile uint16_t s_usart1_rx_head = 0;
+static volatile uint16_t s_usart1_rx_tail = 0;
+static volatile bool s_uart_cmd_flg = false;
 
 /**
  * @brief USART1から1文字受信
@@ -66,12 +66,12 @@ static volatile bool usart1_cmd_flg = false;
  */
 int16_t usart1_getchar(void)
 {
-    if (usart1_rx_head == usart1_rx_tail) {
+    if (s_usart1_rx_head == s_usart1_rx_tail) {
         return -1;  // バッファ空
     }
 
-    uint8_t data = usart1_rx_buffer[usart1_rx_tail];
-    usart1_rx_tail = (usart1_rx_tail + 1) % USART1_RX_BUFFER_SIZE;
+    uint8_t data = s_uart_rx_buf[s_usart1_rx_tail];
+    s_usart1_rx_tail = (s_usart1_rx_tail + 1) % USART1_RX_BUFFER_SIZE;
     return (int16_t)data;
 }
 
@@ -80,10 +80,10 @@ int16_t usart1_getchar(void)
  */
 uint16_t usart1_available(void)
 {
-    if (usart1_rx_head >= usart1_rx_tail) {
-        return usart1_rx_head - usart1_rx_tail;
+    if (s_usart1_rx_head >= s_usart1_rx_tail) {
+        return s_usart1_rx_head - s_usart1_rx_tail;
     } else {
-        return USART1_RX_BUFFER_SIZE - usart1_rx_tail + usart1_rx_head;
+        return USART1_RX_BUFFER_SIZE - s_usart1_rx_tail + s_usart1_rx_head;
     }
 }
 
@@ -92,7 +92,7 @@ uint16_t usart1_available(void)
  */
 bool usart1_is_cmd_ready(void)
 {
-    return usart1_cmd_flg;
+    return s_uart_cmd_flg;
 }
 
 /**
@@ -101,11 +101,11 @@ bool usart1_is_cmd_ready(void)
 void usart1_get_cmd(uint8_t *buf, uint16_t buf_size)
 {
     uint16_t len = 0;
-    uint16_t pos = usart1_rx_tail;
+    uint16_t pos = s_usart1_rx_tail;
 
     /* コマンドバッファ内のデータを抽出 */
-    while (pos != usart1_rx_head && len < buf_size - 1) {
-        uint8_t ch = usart1_rx_buffer[pos];
+    while (pos != s_usart1_rx_head && len < buf_size - 1) {
+        uint8_t ch = s_uart_rx_buf[pos];
         if (ch == '\r' || ch == '\n') {
             break;
         }
@@ -115,11 +115,11 @@ void usart1_get_cmd(uint8_t *buf, uint16_t buf_size)
     buf[len] = '\0';
 
     /* テールポインタをデリミタの次に移動 */
-    if (pos != usart1_rx_head) {
-        usart1_rx_tail = (pos + 1) % USART1_RX_BUFFER_SIZE;
+    if (pos != s_usart1_rx_head) {
+        s_usart1_rx_tail = (pos + 1) % USART1_RX_BUFFER_SIZE;
     }
 
-    usart1_cmd_flg = false;
+    s_uart_cmd_flg = false;
 }
 /* USER CODE END 0 */
 
@@ -141,7 +141,7 @@ void NMI_Handler(void)
 
   /* USER CODE END NonMaskableInt_IRQn 0 */
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-   while (1)
+  while (1)
   {
   }
   /* USER CODE END NonMaskableInt_IRQn 1 */
@@ -284,16 +284,16 @@ void USART1_IRQHandler(void)
   /* 受信データ有効フラグをチェック */
   if (LL_USART_IsActiveFlag_RXNE(USART1)) {
       uint8_t data = LL_USART_ReceiveData8(USART1);
-      uint16_t next_head = (usart1_rx_head + 1) % USART1_RX_BUFFER_SIZE;
+      uint16_t next_head = (s_usart1_rx_head + 1) % USART1_RX_BUFFER_SIZE;
 
       /* バッファオーバーフロー防止 */
-      if (next_head != usart1_rx_tail) {
-          usart1_rx_buffer[usart1_rx_head] = data;
-          usart1_rx_head = next_head;
+      if (next_head != s_usart1_rx_tail) {
+          s_uart_rx_buf[s_usart1_rx_head] = data;
+          s_usart1_rx_head = next_head;
 
           /* デリミタ（\rか\n）を検出したらコマンド受信完了フラグをセット */
           if (data == '\r' || data == '\n') {
-              usart1_cmd_flg = true;
+              s_uart_cmd_flg = true;
           }
       }
   }

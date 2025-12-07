@@ -34,6 +34,63 @@ static int8_t dma_test(void);
 
 static void test_main(void);
 
+#ifdef DEBUG_UART_USE
+typedef void (*p_cbk)(uint8_t *p_arg);
+typedef struct {
+    uint8_t *p_cmd_str;
+    p_cbk p_callback;
+} dbg_cmd_t;
+
+const dbg_cmd_t g_dbg_cmd_tbl[] = {
+    { (uint8_t *)"dbg", NULL },
+    { (uint8_t *)"reg", NULL },
+};
+const uint8_t g_dbg_cmd_tbl_size = sizeof(g_dbg_cmd_tbl) / sizeof(dbg_cmd_t);
+
+uint8_t s_cmd_buf[256];
+
+static void dbg_cmd_exec(uint8_t *p_buf);
+
+static void dbg_cmd_exec(uint8_t *p_buf)
+{
+    uint8_t i;
+    char *p_cmd;
+    char *p_arg;
+
+    if (p_buf == NULL || *p_buf == '\0') {
+        return;
+    }
+
+    p_cmd = (char *)p_buf;
+    p_arg = strchr(p_cmd, ' ');
+
+    if (p_arg != NULL) {
+        *p_arg = '\0';
+        p_arg++;
+
+        while (*p_arg == ' ') {
+            p_arg++;
+        }
+    } else {
+        p_arg = NULL;
+    }
+
+    // テーブルと照合
+    for(i = 0; i < g_dbg_cmd_tbl_size; i++)
+    {
+        if (strcmp(p_cmd, (char *)g_dbg_cmd_tbl[i].p_cmd_str) == 0)
+        {
+            DBG_UART_PRINTF("[DEBUG] cmd: %s\r\n", p_cmd);
+            DBG_UART_PRINTF("[DEBUG] arg: %s\r\n", p_arg ? p_arg : "None");
+
+            // コマンド実行
+            // g_dbg_cmd_tbl[i].func(p_arg);
+            return;
+        }
+    }
+}
+#endif // DEBUG_UART_USE
+
 /**
  * @brief UART経由でprintf()相当の出力
  */
@@ -148,12 +205,14 @@ void app_main(void)
     DBG_UART_PRINTF("App Main\r\n");
 #endif
 
+#ifdef DEBUG_UART_USE
     /* USART1からコマンド受信時の処理 */
     if (usart1_is_cmd_ready()) {
-        uint8_t cmd_buffer[256];
-        usart1_get_cmd(cmd_buffer, sizeof(cmd_buffer));
-        DBG_UART_PRINTF("[CMD] %s\r\n", cmd_buffer);
+        memset(&s_cmd_buf[0], 0, sizeof(s_cmd_buf));
+        usart1_get_cmd(s_cmd_buf, sizeof(s_cmd_buf));
+        dbg_cmd_exec(s_cmd_buf);
     }
+#endif // DEBUG_UART_USE
 
 #ifdef DMA_TEST
     test_main();
