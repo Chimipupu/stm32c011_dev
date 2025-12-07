@@ -125,7 +125,6 @@ int main(void)
     /* USER CODE BEGIN 3 */
     // (DEBUG)
     app_main();
-    LL_mDelay(1000);
   }
   /* USER CODE END 3 */
 }
