@@ -29,7 +29,7 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
@@ -39,7 +39,10 @@ extern "C" {
 void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+int16_t usart1_getchar(void);
+uint16_t usart1_available(void);
+bool usart1_is_cmd_ready(void);
+void usart1_get_cmd(uint8_t *buf, uint16_t buf_size);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

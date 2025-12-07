@@ -13,21 +13,64 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "dma.h"
 #include "main.h"
+#include "usart.h"
+#include <stdarg.h>
 
 #ifdef DMA_TEST
 
 #define TEST_NG     (-1)
 #define TEST_OK     (0)
 
+#ifdef DMA_TEST
 static uint32_t s_dma_src_buf[8];
 static uint32_t s_dma_dst_buf[8];
 static volatile bool s_dma_transfer_done = false;
-
 static void dma_transfer_complete_cb(DMA_HandleTypeDef *p_hdma);
 static int8_t dma_test(void);
+#endif // DMA_TEST
+
 static void test_main(void);
+
+/**
+ * @brief UART経由でprintf()相当の出力
+ */
+void DBG_UART_PRINTF(const char *format, ...)
+{
+#ifdef DEBUG_UART_USE
+    char buffer[256];
+    va_list args;
+    int len;
+
+    va_start(args, format);
+    len = vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+
+    for (int i = 0; i < len && i < sizeof(buffer); i++) {
+        while (!LL_USART_IsActiveFlag_TXE(USART1));
+        LL_USART_TransmitData8(USART1, (uint8_t)buffer[i]);
+    }
+#endif
+}
+
+#if 0
+void uart_tx_data(uint8_t *p_buf, uint32_t len)
+{
+#ifdef DEBUG_UART_USE
+    uint8_t *p_ptr = p_buf;
+    uint32_t i;
+
+    for(i = 0; i < len; i++)
+    {
+        while (!LL_USART_IsActiveFlag_TXE(USART1));
+        LL_USART_TransmitData8(USART1, *p_ptr);
+        p_ptr++;
+    }
+#endif
+}
+#endif
 
 static void dma_transfer_complete_cb(DMA_HandleTypeDef *p_hdma)
 {
@@ -59,6 +102,8 @@ static int8_t dma_test(void)
                             word_count);
 
     // Verify
+    DBG_UART_PRINTF("[DEBUG] DMA Src: %s\r\n", &s_dma_src_buf[0]);
+    DBG_UART_PRINTF("[DEBUG] DMA Dst: %s\r\n", &s_dma_dst_buf[0]);
     verify = memcmp((const void *)s_dma_src_buf, (const void *)s_dma_dst_buf, str_len);
     ret = (verify == 0) ? TEST_OK : TEST_NG;
 
@@ -71,10 +116,13 @@ static void test_main(void)
     static bool is_tested = false;
 
     if (is_tested != true) {
+        DBG_UART_PRINTF("[DEBUG] DMA Test: START\r\n");
         ret = dma_test();
         if (ret == TEST_OK) {
+            DBG_UART_PRINTF("[DEBUG] DMA Test: PASSED\r\n");
             is_tested = true;
         } else {
+            DBG_UART_PRINTF("[DEBUG] DMA Test: FAILED\r\n");
             is_tested = false;
         }
     }
@@ -96,6 +144,17 @@ void app_main_init(void)
 
 void app_main(void)
 {
+#if 0
+    DBG_UART_PRINTF("App Main\r\n");
+#endif
+
+    /* USART1からコマンド受信時の処理 */
+    if (usart1_is_cmd_ready()) {
+        uint8_t cmd_buffer[256];
+        usart1_get_cmd(cmd_buffer, sizeof(cmd_buffer));
+        DBG_UART_PRINTF("[CMD] %s\r\n", cmd_buffer);
+    }
+
 #ifdef DMA_TEST
     test_main();
 #endif // DMA_TEST

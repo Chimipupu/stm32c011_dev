@@ -22,6 +22,7 @@
 #include "stm32c0xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,6 +53,74 @@
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+/* USART1受信バッファ */
+#define USART1_RX_BUFFER_SIZE 256
+static volatile uint8_t usart1_rx_buffer[USART1_RX_BUFFER_SIZE];
+static volatile uint16_t usart1_rx_head = 0;
+static volatile uint16_t usart1_rx_tail = 0;
+static volatile bool usart1_cmd_flg = false;
+
+/**
+ * @brief USART1から1文字受信
+ * @return 受信データ（バッファが空の場合は-1）
+ */
+int16_t usart1_getchar(void)
+{
+    if (usart1_rx_head == usart1_rx_tail) {
+        return -1;  // バッファ空
+    }
+
+    uint8_t data = usart1_rx_buffer[usart1_rx_tail];
+    usart1_rx_tail = (usart1_rx_tail + 1) % USART1_RX_BUFFER_SIZE;
+    return (int16_t)data;
+}
+
+/**
+ * @brief USART1受信バッファに格納されたデータ数
+ */
+uint16_t usart1_available(void)
+{
+    if (usart1_rx_head >= usart1_rx_tail) {
+        return usart1_rx_head - usart1_rx_tail;
+    } else {
+        return USART1_RX_BUFFER_SIZE - usart1_rx_tail + usart1_rx_head;
+    }
+}
+
+/**
+ * @brief USART1受信コマンドフラグを取得
+ */
+bool usart1_is_cmd_ready(void)
+{
+    return usart1_cmd_flg;
+}
+
+/**
+ * @brief USART1受信コマンドを取得してバッファをクリア
+ */
+void usart1_get_cmd(uint8_t *buf, uint16_t buf_size)
+{
+    uint16_t len = 0;
+    uint16_t pos = usart1_rx_tail;
+
+    /* コマンドバッファ内のデータを抽出 */
+    while (pos != usart1_rx_head && len < buf_size - 1) {
+        uint8_t ch = usart1_rx_buffer[pos];
+        if (ch == '\r' || ch == '\n') {
+            break;
+        }
+        buf[len++] = ch;
+        pos = (pos + 1) % USART1_RX_BUFFER_SIZE;
+    }
+    buf[len] = '\0';
+
+    /* テールポインタをデリミタの次に移動 */
+    if (pos != usart1_rx_head) {
+        usart1_rx_tail = (pos + 1) % USART1_RX_BUFFER_SIZE;
+    }
+
+    usart1_cmd_flg = false;
+}
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -212,6 +281,33 @@ void I2C1_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
+  /* 受信データ有効フラグをチェック */
+  if (LL_USART_IsActiveFlag_RXNE(USART1)) {
+      uint8_t data = LL_USART_ReceiveData8(USART1);
+      uint16_t next_head = (usart1_rx_head + 1) % USART1_RX_BUFFER_SIZE;
+
+      /* バッファオーバーフロー防止 */
+      if (next_head != usart1_rx_tail) {
+          usart1_rx_buffer[usart1_rx_head] = data;
+          usart1_rx_head = next_head;
+
+          /* デリミタ（\rか\n）を検出したらコマンド受信完了フラグをセット */
+          if (data == '\r' || data == '\n') {
+              usart1_cmd_flg = true;
+          }
+      }
+  }
+
+  /* オーバーラン、フレーミングエラー等をクリア */
+  if (LL_USART_IsActiveFlag_ORE(USART1)) {
+      LL_USART_ClearFlag_ORE(USART1);
+  }
+  if (LL_USART_IsActiveFlag_FE(USART1)) {
+      LL_USART_ClearFlag_FE(USART1);
+  }
+  if (LL_USART_IsActiveFlag_PE(USART1)) {
+      LL_USART_ClearFlag_PE(USART1);
+  }
 
   /* USER CODE END USART1_IRQn 0 */
   /* USER CODE BEGIN USART1_IRQn 1 */

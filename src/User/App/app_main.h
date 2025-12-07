@@ -15,10 +15,12 @@
 #include <stdint.h>
 
 // [コンパイル]
-// #define DEBUG_UART_USE
+#define DEBUG_UART_USE
 #define DMA_TEST
 // #define DEBUG_TEST
 
+// void uart_tx_data(uint8_t *p_buf, uint32_t len);
+void DBG_UART_PRINTF(const char *format, ...);
 extern void app_main_init(void);
 extern void app_main(void);
 

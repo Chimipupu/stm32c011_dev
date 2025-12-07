@@ -95,7 +95,8 @@ void MX_USART1_UART_Init(void)
   {
   }
   /* USER CODE BEGIN USART1_Init 2 */
-
+  /* 受信割り込みを有効化 */
+  LL_USART_EnableIT_RXNE(USART1);
   /* USER CODE END USART1_Init 2 */
 
 }

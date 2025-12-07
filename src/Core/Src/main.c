@@ -105,7 +105,7 @@ int main(void)
   // MX_TIM17_Init();
 
   #ifdef DMA_TEST
-    // MX_DMA_Init();
+    MX_DMA_Init();
   #endif // DMA_TEST
 
   #ifdef DEBUG_UART_USE
@@ -125,7 +125,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
     // (DEBUG)
     app_main();
-    // LL_mDelay(1000);
+    LL_mDelay(1000);
   }
   /* USER CODE END 3 */
 }
