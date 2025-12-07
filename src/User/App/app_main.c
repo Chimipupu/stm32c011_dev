@@ -10,46 +10,58 @@
  */
 
 #include "app_main.h"
+
+// --------------------------------
+// C Std library
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include "dma.h"
-#include "main.h"
-#include "usart.h"
 #include <stdarg.h>
+#include <stdio.h>
 
-#ifdef DMA_TEST
+// ST SDK
+#include "usart.h"
+#include "main.h"
 
-#define TEST_NG     (-1)
-#define TEST_OK     (0)
+// My App
+#ifdef DEBUG_TEST
+#include "debug_test.h"
+#endif // DEBUG_TEST
 
-#ifdef DMA_TEST
-static uint32_t s_dma_src_buf[8];
-static uint32_t s_dma_dst_buf[8];
-static volatile bool s_dma_transfer_done = false;
-static void dma_transfer_complete_cb(DMA_HandleTypeDef *p_hdma);
-static int8_t dma_test(void);
-#endif // DMA_TEST
-
-static void test_main(void);
-
+// --------------------------------
 #ifdef DEBUG_UART_USE
 typedef void (*p_cbk)(uint8_t *p_arg);
+
 typedef struct {
-    uint8_t *p_cmd_str;
+    char *p_cmd_str;
     p_cbk p_callback;
 } dbg_cmd_t;
 
+static void cmd_dbg(uint8_t *p_arg);
+static void cmd_reg(uint8_t *p_arg);
+
 const dbg_cmd_t g_dbg_cmd_tbl[] = {
-    { (uint8_t *)"dbg", NULL },
-    { (uint8_t *)"reg", NULL },
+    { "dbg", cmd_dbg },
+    { "reg", cmd_reg },
 };
+
 const uint8_t g_dbg_cmd_tbl_size = sizeof(g_dbg_cmd_tbl) / sizeof(dbg_cmd_t);
 
 uint8_t s_cmd_buf[256];
 
 static void dbg_cmd_exec(uint8_t *p_buf);
+// --------------------------------
+static void cmd_dbg(uint8_t *p_arg)
+{
+    DBG_UART_PRINTF("[DEBUG] DBG Command\r\n");
+    // TODO:
+}
+
+static void cmd_reg(uint8_t *p_arg)
+{
+    DBG_UART_PRINTF("[DEBUG] REG Command\r\n");
+    // TODO:
+}
 
 static void dbg_cmd_exec(uint8_t *p_buf)
 {
@@ -84,7 +96,11 @@ static void dbg_cmd_exec(uint8_t *p_buf)
             DBG_UART_PRINTF("[DEBUG] arg: %s\r\n", p_arg ? p_arg : "None");
 
             // コマンド実行
-            // g_dbg_cmd_tbl[i].func(p_arg);
+            if(p_arg == NULL) {
+                g_dbg_cmd_tbl[i].p_callback(NULL);
+            } else {
+                g_dbg_cmd_tbl[i].p_callback((uint8_t *)p_arg);
+            }
             return;
         }
     }
@@ -112,98 +128,20 @@ void DBG_UART_PRINTF(const char *format, ...)
 #endif
 }
 
-#if 0
-void uart_tx_data(uint8_t *p_buf, uint32_t len)
-{
-#ifdef DEBUG_UART_USE
-    uint8_t *p_ptr = p_buf;
-    uint32_t i;
-
-    for(i = 0; i < len; i++)
-    {
-        while (!LL_USART_IsActiveFlag_TXE(USART1));
-        LL_USART_TransmitData8(USART1, *p_ptr);
-        p_ptr++;
-    }
-#endif
-}
-#endif
-
-static void dma_transfer_complete_cb(DMA_HandleTypeDef *p_hdma)
-{
-    s_dma_transfer_done = true;
-}
-
-/**
- * @brief DMAテスト
- * 
- * @return int8_t   0:正常終了
-                    -1:異常終了
- */
-static int8_t dma_test(void)
-{
-    int8_t ret = TEST_NG;
-    int8_t verify;
-    const char test_str[] = "DMA TEST";
-    const uint8_t str_len = 8;
-    const uint32_t word_count = (uint32_t)((str_len + 3) / 4);
-
-    memset(s_dma_src_buf, 0, sizeof(s_dma_src_buf));
-    memcpy(s_dma_src_buf, test_str, str_len);
-    memset(s_dma_dst_buf, 0, sizeof(s_dma_dst_buf));
-    s_dma_transfer_done = false;
-
-    HAL_DMA_Start_IT(&hdma_memtomem_dma1_channel1,
-                            (uint32_t)s_dma_src_buf,
-                            (uint32_t)s_dma_dst_buf,
-                            word_count);
-
-    // Verify
-    DBG_UART_PRINTF("[DEBUG] DMA Src: %s\r\n", &s_dma_src_buf[0]);
-    DBG_UART_PRINTF("[DEBUG] DMA Dst: %s\r\n", &s_dma_dst_buf[0]);
-    verify = memcmp((const void *)s_dma_src_buf, (const void *)s_dma_dst_buf, str_len);
-    ret = (verify == 0) ? TEST_OK : TEST_NG;
-
-    return ret;
-}
-
-static void test_main(void)
-{
-    int8_t ret;
-    static bool is_tested = false;
-
-    if (is_tested != true) {
-        DBG_UART_PRINTF("[DEBUG] DMA Test: START\r\n");
-        ret = dma_test();
-        if (ret == TEST_OK) {
-            DBG_UART_PRINTF("[DEBUG] DMA Test: PASSED\r\n");
-            is_tested = true;
-        } else {
-            DBG_UART_PRINTF("[DEBUG] DMA Test: FAILED\r\n");
-            is_tested = false;
-        }
-    }
-}
-#endif // DMA_TEST
-
 void app_main_init(void)
 {
-#ifdef DMA_TEST
-    memset(s_dma_src_buf, 0, sizeof(s_dma_src_buf));
-    memset(s_dma_dst_buf, 0, sizeof(s_dma_dst_buf));
-
-    HAL_DMA_RegisterCallback(&hdma_memtomem_dma1_channel1,
-                        HAL_DMA_XFER_CPLT_CB_ID,
-                        dma_transfer_complete_cb
-                        );
-#endif // DMA_TEST
+#ifdef DEBUG_TEST
+    dbg_test_init();
+#endif // DEBUG_TEST
 }
 
 void app_main(void)
 {
-#if 0
-    DBG_UART_PRINTF("App Main\r\n");
-#endif
+    // DBG_UART_PRINTF("App Main\r\n");
+
+#ifdef DEBUG_TEST
+    dbg_test_main();
+#endif // DEBUG_TEST
 
 #ifdef DEBUG_UART_USE
     /* USART1からコマンド受信時の処理 */
@@ -213,8 +151,4 @@ void app_main(void)
         dbg_cmd_exec(s_cmd_buf);
     }
 #endif // DEBUG_UART_USE
-
-#ifdef DMA_TEST
-    test_main();
-#endif // DMA_TEST
 }

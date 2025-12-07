@@ -27,6 +27,11 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app_main.h"
+
+#ifdef DEBUG_TEST
+#include "debug_test.h"
+#endif // DEBUG_TEST
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
