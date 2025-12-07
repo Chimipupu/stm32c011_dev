@@ -15,7 +15,7 @@
 #define TEST_NG     (-1)
 #define TEST_OK     (0)
 
-#define DMA_TEST
+// #define DMA_TEST
 
 void dbg_test_init(void);
 void dbg_test_main(void);

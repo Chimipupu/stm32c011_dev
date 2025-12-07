@@ -11,12 +11,16 @@
 
 #include "debug_test.h"
 
+// --------------------------------
+// C Std library
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
 
+// ST SDK
 #include "dma.h"
 
+// My App
 #include "app_main.h"
 
 // --------------------------------
@@ -27,20 +31,25 @@ typedef struct {
     p_func p_test_func;
 } dbg_test_t;
 
+#ifdef DMA_TEST
 static uint32_t s_dma_src_buf[8];
 static uint32_t s_dma_dst_buf[8];
 static volatile bool s_dma_transfer_done = false;
 
 static void dma_transfer_complete_cb(DMA_HandleTypeDef *p_hdma);
 static int8_t dma_test(void);
+#endif // DMA_TEST
 
 const dbg_test_t g_dbg_test_tbl[] = {
+#ifdef DMA_TEST
     { "DMA", dma_test },
+#endif // DMA_TEST
     { NULL, NULL }
 };
 const uint8_t g_dbg_test_tbl_size = sizeof(g_dbg_test_tbl) / sizeof(dbg_test_t);
 
 // --------------------------------
+#ifdef DMA_TEST
 static void dma_transfer_complete_cb(DMA_HandleTypeDef *p_hdma)
 {
     s_dma_transfer_done = true;
@@ -72,9 +81,11 @@ static int8_t dma_test(void)
 
     return ret;
 }
+#endif // DMA_TEST
 
 void dbg_test_init(void)
 {
+#ifdef DMA_TEST
     memset(s_dma_src_buf, 0, sizeof(s_dma_src_buf));
     memset(s_dma_dst_buf, 0, sizeof(s_dma_dst_buf));
 
@@ -82,27 +93,24 @@ void dbg_test_init(void)
                         HAL_DMA_XFER_CPLT_CB_ID,
                         dma_transfer_complete_cb
                         );
+#endif // DMA_TEST
 }
 
 void dbg_test_main(void)
 {
     int8_t ret;
     static uint8_t s_test = 0;
-    static bool is_tested = false;
+    static bool is_test_end = false;
 
-    if (is_tested != true) {
+    if (is_test_end != true) {
         if (g_dbg_test_tbl[s_test].p_test_name != NULL) {
             DBG_UART_PRINTF("[DEBUG] %s Test: Start\r\n", g_dbg_test_tbl[s_test].p_test_name);
             ret = g_dbg_test_tbl[s_test].p_test_func();
-            if (ret == TEST_OK) {
-                DBG_UART_PRINTF("[DEBUG] Test Result: OK\r\n");
-            } else {
-                DBG_UART_PRINTF("[DEBUG] Test Result: NG\r\n");
-            }
+            DBG_UART_PRINTF("[DEBUG] Test Result:");
+            DBG_UART_PRINTF("%s\r\n", (ret == TEST_OK) ? "OK" : "NG");
             s_test++;
         } else {
-            is_tested = true;
-            DBG_UART_PRINTF("[DEBUG] All Tests Completed\r\n");
+            is_test_end = true;
         }
     }
 }
