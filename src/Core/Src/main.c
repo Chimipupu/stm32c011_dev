@@ -54,7 +54,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-extern uint32_t SystemCoreClock;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -117,13 +117,6 @@ int main(void)
 
   #ifdef DEBUG_UART_USE
     MX_USART1_UART_Init();
-    #if 1
-      DBG_UART_PRINTF("STM32C011F4P6 Develop F/W Ver 0.1\r\n");
-      DBG_UART_PRINTF("Chimipupu(https://github.com/Chimipupu)\r\n");
-      DBG_UART_PRINTF("Copyright (c) 2025 Chimipupu All Rights Reserved.\r\n");
-      DBG_UART_PRINTF("[DEBUG] Clock: %d MHz\r\n", SystemCoreClock / 1000000);
-      DBG_UART_PRINTF("[DEBUG] Flash: 16 KB, SRAM: 6 KB\r\n");
-    #endif
   #endif // DEBUG_UART_USE
 #endif
 

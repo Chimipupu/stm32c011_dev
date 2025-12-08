@@ -29,6 +29,8 @@
 #endif // DEBUG_TEST
 
 // --------------------------------
+extern uint32_t SystemCoreClock;
+
 #ifdef DEBUG_UART_USE
 typedef void (*p_cbk)(uint8_t *p_arg);
 
@@ -37,12 +39,16 @@ typedef struct {
     p_cbk p_callback;
 } dbg_cmd_t;
 
+static void cmd_help(uint8_t *p_arg);
+static void cmd_cls(uint8_t *p_arg);
 static void cmd_dbg(uint8_t *p_arg);
 static void cmd_reg(uint8_t *p_arg);
 
 const dbg_cmd_t g_dbg_cmd_tbl[] = {
-    { "dbg", cmd_dbg },
-    { "reg", cmd_reg },
+    { "help", cmd_help },
+    { "cls",  cmd_cls },
+    { "dbg",  cmd_dbg },
+    { "reg",  cmd_reg },
 };
 
 const uint8_t g_dbg_cmd_tbl_size = sizeof(g_dbg_cmd_tbl) / sizeof(dbg_cmd_t);
@@ -51,6 +57,29 @@ uint8_t s_cmd_buf[256];
 
 static void dbg_cmd_exec(uint8_t *p_buf);
 // --------------------------------
+static void cmd_help(uint8_t *p_arg)
+{
+    uint8_t i;
+
+    DBG_UART_PRINTF("STM32C011F4P6 Develop F/W Ver 0.1\r\n");
+    DBG_UART_PRINTF("Chimipupu(https://github.com/Chimipupu)\r\n");
+    DBG_UART_PRINTF("Copyright (c) 2025 Chimipupu All Rights Reserved.\r\n");
+    DBG_UART_PRINTF("[DEBUG] Clock: %d MHz\r\n", SystemCoreClock / 1000000);
+    DBG_UART_PRINTF("[DEBUG] Flash: 16 KB, SRAM: 6 KB\r\n");
+    DBG_UART_PRINTF("Available Commands: %d\r\n", g_dbg_cmd_tbl_size);
+
+    for(i = 0; i < g_dbg_cmd_tbl_size; i++)
+    {
+        DBG_UART_PRINTF("No.%d: %s\r\n", i, g_dbg_cmd_tbl[i].p_cmd_str);
+    }
+}
+
+static void cmd_cls(uint8_t *p_arg)
+{
+    // ANSIエスケープシーケンスで画面クリア
+    DBG_UART_PRINTF("\033[2J\033[H");
+}
+
 static void cmd_dbg(uint8_t *p_arg)
 {
     DBG_UART_PRINTF("[DEBUG] DBG Command\r\n");
@@ -92,8 +121,8 @@ static void dbg_cmd_exec(uint8_t *p_buf)
     {
         if (strcmp(p_cmd, (char *)g_dbg_cmd_tbl[i].p_cmd_str) == 0)
         {
-            DBG_UART_PRINTF("[DEBUG] cmd: %s\r\n", p_cmd);
-            DBG_UART_PRINTF("[DEBUG] arg: %s\r\n", p_arg ? p_arg : "None");
+            // DBG_UART_PRINTF("[DEBUG] cmd: %s\r\n", p_cmd);
+            // DBG_UART_PRINTF("[DEBUG] arg: %s\r\n", p_arg ? p_arg : "None");
 
             // コマンド実行
             if(p_arg == NULL) {
@@ -101,9 +130,10 @@ static void dbg_cmd_exec(uint8_t *p_buf)
             } else {
                 g_dbg_cmd_tbl[i].p_callback((uint8_t *)p_arg);
             }
-            return;
+            break;
         }
     }
+    DBG_UART_PRINTF("\n> ");
 }
 #endif // DEBUG_UART_USE
 
@@ -121,7 +151,8 @@ void DBG_UART_PRINTF(const char *format, ...)
     len = vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
 
-    for (int i = 0; i < len && i < sizeof(buffer); i++) {
+    for (int i = 0; i < len && i < sizeof(buffer); i++)
+    {
         while (!LL_USART_IsActiveFlag_TXE(USART1));
         LL_USART_TransmitData8(USART1, (uint8_t)buffer[i]);
     }

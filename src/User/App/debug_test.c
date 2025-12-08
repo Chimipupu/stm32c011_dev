@@ -89,7 +89,6 @@ static void calc_pi_spigot(void)
                 d *= i;
             }
             i--;
-            // ------------------
         }
 
         int val = c + d / 10000;
