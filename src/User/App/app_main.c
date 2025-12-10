@@ -156,7 +156,7 @@ void DBG_UART_PRINTF(const char *format, ...)
         while (!LL_USART_IsActiveFlag_TXE(USART1));
         LL_USART_TransmitData8(USART1, (uint8_t)buffer[i]);
     }
-#endif
+#endif // DEBUG_UART_USE
 }
 
 void app_main_init(void)

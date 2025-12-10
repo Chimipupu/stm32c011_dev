@@ -15,8 +15,10 @@
 #define TEST_NG     (-1)
 #define TEST_OK     (0)
 
+// --------------------------------
+// [コンパイル]
 // #define DMA_TEST
-
+// --------------------------------
 void dbg_test_init(void);
 void dbg_test_main(void);
 
