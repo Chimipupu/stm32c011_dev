@@ -32,7 +32,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+#define FLASH_32KB_TEST
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -50,7 +50,10 @@
 /* USER CODE BEGIN PV */
 
 // NOTE: STM32C011F4x, J4xのROM 16KB品でも32KBまで書けるICがあるらしいからテスト用
+#ifdef FLASH_32KB_TEST
 volatile const uint8_t g_dmy_tbl[0x7000] = {0};
+#endif // FLASH_32KB_TEST
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -103,7 +106,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   // NOTE: STM32C011のROM 16KB品でも32KBまで書けるICのテスト用無駄コード
-#if 1
+#ifdef FLASH_32KB_TEST
   bool is_error = false;
   uint8_t ref_val = 0;
   uint16_t i;
@@ -119,7 +122,7 @@ int main(void)
   {
     NVIC_SystemReset();
   }
-#endif
+#endif // FLASH_32KB_TEST
 
   /* USER CODE END 2 */
 
