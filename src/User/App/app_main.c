@@ -24,14 +24,14 @@
 #include "main.h"
 
 // My App
-#ifdef DEBUG_TEST
+#ifdef DBG_TEST
 #include "debug_test.h"
-#endif // DEBUG_TEST
+#endif // DBG_TEST
 
 // --------------------------------
 extern uint32_t SystemCoreClock;
 
-#ifdef DEBUG_UART_USE
+#ifdef DBG_USE_UART
 typedef void (*p_cbk)(uint8_t *p_arg);
 
 typedef struct {
@@ -135,14 +135,14 @@ static void dbg_cmd_exec(uint8_t *p_buf)
     }
     DBG_UART_PRINTF("\n> ");
 }
-#endif // DEBUG_UART_USE
+#endif // DBG_USE_UART
 
 /**
  * @brief UART経由でprintf()相当の出力
  */
 void DBG_UART_PRINTF(const char *format, ...)
 {
-#ifdef DEBUG_UART_USE
+#ifdef DBG_USE_UART
     char buffer[256];
     va_list args;
     int len;
@@ -156,30 +156,30 @@ void DBG_UART_PRINTF(const char *format, ...)
         while (!LL_USART_IsActiveFlag_TXE(USART1));
         LL_USART_TransmitData8(USART1, (uint8_t)buffer[i]);
     }
-#endif // DEBUG_UART_USE
+#endif // DBG_USE_UART
 }
 
 void app_main_init(void)
 {
-#ifdef DEBUG_TEST
+#ifdef DBG_TEST
     dbg_test_init();
-#endif // DEBUG_TEST
+#endif // DBG_TEST
 }
 
 void app_main(void)
 {
     // DBG_UART_PRINTF("App Main\r\n");
 
-#ifdef DEBUG_TEST
+#ifdef DBG_TEST
     dbg_test_main();
-#endif // DEBUG_TEST
+#endif // DBG_TEST
 
-#ifdef DEBUG_UART_USE
+#ifdef DBG_USE_UART
     /* USART1からコマンド受信時の処理 */
     if (usart1_is_cmd_ready()) {
         memset(&s_cmd_buf[0], 0, sizeof(s_cmd_buf));
         usart1_get_cmd(s_cmd_buf, sizeof(s_cmd_buf));
         dbg_cmd_exec(s_cmd_buf);
     }
-#endif // DEBUG_UART_USE
+#endif // DBG_USE_UART
 }

@@ -15,13 +15,11 @@
 #include <stdint.h>
 
 // --------------------------------
-// [コンパイル]
-
+// [コンパイルスイッチ]
 // NOTE: UARTでのprintf()用　※ただこれはROMを7KBも食う大食い
-#define DEBUG_UART_USE
-
+#define DBG_USE_UART
 // NOTE: テスト関連
-// #define DEBUG_TEST
+#define DBG_TEST
 // --------------------------------
 void DBG_UART_PRINTF(const char *format, ...);
 extern void app_main_init(void);

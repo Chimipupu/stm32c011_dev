@@ -9,8 +9,8 @@
  * 
  */
 
-#ifndef DEBUG_TEST_H
-#define DEBUG_TEST_H
+#ifndef DBG_TEST_H
+#define DBG_TEST_H
 
 #define TEST_NG     (-1)
 #define TEST_OK     (0)
@@ -22,4 +22,4 @@
 void dbg_test_init(void);
 void dbg_test_main(void);
 
-#endif // DEBUG_TEST_H
+#endif // DBG_TEST_H

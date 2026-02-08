@@ -30,9 +30,9 @@
 /* USER CODE BEGIN Includes */
 #include "app_main.h"
 
-#ifdef DEBUG_TEST
+#ifdef DBG_TEST
 #include "debug_test.h"
-#endif // DEBUG_TEST
+#endif // DBG_TEST
 
 /* USER CODE END Includes */
 
@@ -115,9 +115,9 @@ int main(void)
     MX_DMA_Init();
   #endif // DMA_TEST
 
-  #ifdef DEBUG_UART_USE
+  #ifdef DBG_USE_UART
     MX_USART1_UART_Init();
-  #endif // DEBUG_UART_USE
+  #endif // DBG_USE_UART
 #endif
 
   // アプリメイン初期化
